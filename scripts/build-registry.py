@@ -30,6 +30,11 @@ ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)+$")
 VERSION = re.compile(r"^\d+\.\d+\.\d+$")
 COMMAND = re.compile(r"^[a-z][a-z0-9_]*$")
 REQUIRED = ["memory", "crc_alloc", "crc_free"]
+ICONS = {
+    line.strip()
+    for line in (ROOT / "scripts" / "icons.txt").read_text().splitlines()
+    if line.strip() and not line.startswith("#")
+}
 
 
 def fail(where, why):
@@ -110,6 +115,10 @@ def main():
             fail(where, f"unknown capabilities {sorted(unknown)}")
         if not m["commands"]:
             fail(where, "no commands")
+        if m.get("icon", "extensions") not in ICONS:
+            fail(where, f"unknown icon {m.get('icon')!r}; see scripts/icons.txt")
+        if "homepage" in m and not str(m["homepage"]).startswith("https://"):
+            fail(where, "homepage must be an https address")
         readme = folder / "README.md"
         if not readme.is_file():
             fail(where, "no README.md (it is shown before install)")
@@ -145,7 +154,8 @@ def main():
         print(f"{m['id']} {m['version']}: {len(data)} bytes, {len(m['commands'])} commands")
     index = {"api": API, "extensions": entries}
     (out / "index.json").write_text(json.dumps(index, indent=2, ensure_ascii=False) + "\n")
-    print(f"{out.relative_to(ROOT)}/index.json: {len(entries)} extensions")
+    shown = out.relative_to(ROOT) if out.is_relative_to(ROOT) else out
+    print(f"{shown}/index.json: {len(entries)} extensions")
 
 
 if __name__ == "__main__":

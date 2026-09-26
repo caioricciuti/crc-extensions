@@ -7,16 +7,21 @@ How crc runs extensions is in the
 [extensions design](https://crceditor.com/extensions/): WebAssembly modules
 with a manifest that declares what each one may read, write and reach, run
 by crc's own interpreter with a budget, off the main thread. crc's side is
-being built now; nothing here is installable yet.
+shipping; the official registry is published from this repository's
+releases.
 
 ## What is here
 
 ```
 crc-extension/          the crate: an extension is a plain Rust function
                         from Input to Output
-extensions/sort-lines/  the first extension: sort, sort descending,
-                        remove duplicate lines
-scripts/                build-registry.py writes and checks the registry
+extensions/sort-lines/  Sort Lines: sort, sort descending, remove duplicates
+extensions/change-case/ Change Case: upper, lower, title, snake_case,
+                        kebab-case, camelCase, PascalCase, CONSTANT_CASE
+extensions/encode/      Encode and Decode: Base64, URL and HTML, both ways
+scripts/                new-extension.py starts a new one; build-registry.py
+                        writes and checks the registry; icons.txt lists the
+                        icons a manifest may name
 docs/                   writing-an-extension.md, how to make your own
 ```
 
@@ -24,7 +29,8 @@ A tag `registry-<date>` builds everything from source, signs the registry
 (`index.json`) and opens a draft release. crc reads the latest published
 release and checks the signature against a key built into the app.
 
-To write one, read [docs/writing-an-extension.md](docs/writing-an-extension.md).
+To write one: `python3 scripts/new-extension.py`, then read
+[docs/writing-an-extension.md](docs/writing-an-extension.md).
 
 ## Rules for every extension in this repository
 

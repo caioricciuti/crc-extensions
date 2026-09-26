@@ -3,8 +3,22 @@
 version = 4
 
 [[package]]
+name = "change-case"
+version = "0.1.0"
+dependencies = [
+ "crc-extension",
+]
+
+[[package]]
 name = "crc-extension"
 version = "0.1.0"
+
+[[package]]
+name = "encode"
+version = "0.1.0"
+dependencies = [
+ "crc-extension",
+]
 
 [[package]]
 name = "sort-lines"

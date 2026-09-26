@@ -1,0 +1,53 @@
+{
+  "id": "crc.change-case",
+  "name": "Change Case",
+  "version": "0.1.0",
+  "description": "Change the case of the selection or document: upper, lower, title, snake_case, kebab-case, camelCase, PascalCase and CONSTANT_CASE.",
+  "authors": [
+    "crc"
+  ],
+  "license": "MIT OR Apache-2.0",
+  "icon": "case-sensitive",
+  "api": 1,
+  "entry": "change_case.wasm",
+  "capabilities": [
+    "selection.read",
+    "selection.replace",
+    "document.read",
+    "document.edit"
+  ],
+  "commands": [
+    {
+      "id": "upper",
+      "title": "Upper Case"
+    },
+    {
+      "id": "lower",
+      "title": "Lower Case"
+    },
+    {
+      "id": "title",
+      "title": "Title Case"
+    },
+    {
+      "id": "snake",
+      "title": "snake_case"
+    },
+    {
+      "id": "kebab",
+      "title": "kebab-case"
+    },
+    {
+      "id": "camel",
+      "title": "camelCase"
+    },
+    {
+      "id": "pascal",
+      "title": "PascalCase"
+    },
+    {
+      "id": "constant",
+      "title": "CONSTANT_CASE"
+    }
+  ]
+}

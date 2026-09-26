@@ -12,10 +12,21 @@ manifest asks and you agree. The design behind this is at
 - The WebAssembly target: `rustup target add wasm32-unknown-unknown`.
   Inside this repository `rust-toolchain.toml` does that for you.
 
-## Start from Sort Lines
+## Start one
 
-Copy `extensions/sort-lines` to `extensions/<your-name>` and change three
-files.
+```sh
+python3 scripts/new-extension.py
+```
+
+It asks for everything crc shows before install: the id (`author.name`),
+the name, a one-line description, the author, an icon, and each command
+with the title the palette shows. It writes `extensions/<name>/` with a
+`Cargo.toml`, a `src/lib.rs` with a function per command and a test, the
+`manifest.json` and a `README.md`, and prints the next steps. It builds and
+passes CI as generated; then you fill it in. With flags it asks nothing:
+`python3 scripts/new-extension.py --help`.
+
+The files it writes:
 
 **`Cargo.toml`**: the package name. The `.wasm` file is named after it, with
 dashes turned into underscores.
@@ -60,6 +71,11 @@ both. `crc_extension::log` writes to crc's extension log while you debug.
 - `id` is `author.name`, lower case, and never changes.
 - Each command's `id` must match a name in `commands!`; its `title` is what
   the palette shows.
+- `icon` is a name from `scripts/icons.txt` (`--list-icons` prints them),
+  one of the icons crc already draws. Extensions do not ship images: crc
+  never decodes a file from an extension, and every icon is tinted to match
+  the theme.
+- `homepage` is optional, an `https://` address shown on the details.
 - `capabilities` lists what the extension may do. Ask for as little as you
   can. The ones that exist today:
 

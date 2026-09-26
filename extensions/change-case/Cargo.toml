@@ -1,0 +1,13 @@
+[package]
+name = "change-case"
+version = "0.1.0"
+publish = false
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+crc-extension = { path = "../../crc-extension" }
