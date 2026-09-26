@@ -3,6 +3,20 @@
 version = 4
 
 [[package]]
+name = "banner"
+version = "0.1.0"
+dependencies = [
+ "crc-extension",
+]
+
+[[package]]
+name = "calculate"
+version = "0.1.0"
+dependencies = [
+ "crc-extension",
+]
+
+[[package]]
 name = "change-case"
 version = "0.1.0"
 dependencies = [
@@ -21,7 +35,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "hash"
+version = "0.1.0"
+dependencies = [
+ "crc-extension",
+]
+
+[[package]]
+name = "json-tools"
+version = "0.1.0"
+dependencies = [
+ "crc-extension",
+]
+
+[[package]]
+name = "lines"
+version = "0.1.0"
+dependencies = [
+ "crc-extension",
+]
+
+[[package]]
 name = "sort-lines"
+version = "0.1.0"
+dependencies = [
+ "crc-extension",
+]
+
+[[package]]
+name = "tables"
 version = "0.1.0"
 dependencies = [
  "crc-extension",

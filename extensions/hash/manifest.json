@@ -1,0 +1,43 @@
+{
+  "id": "crc.hash",
+  "name": "Hash",
+  "version": "0.1.0",
+  "description": "MD5, SHA-1, SHA-256, SHA-512 and CRC32 of the selection, and decode a JWT.",
+  "authors": [
+    "crc"
+  ],
+  "license": "MIT OR Apache-2.0",
+  "icon": "lock",
+  "api": 1,
+  "entry": "hash.wasm",
+  "capabilities": [
+    "selection.read",
+    "selection.replace"
+  ],
+  "commands": [
+    {
+      "id": "md5",
+      "title": "MD5"
+    },
+    {
+      "id": "sha1",
+      "title": "SHA-1"
+    },
+    {
+      "id": "sha256",
+      "title": "SHA-256"
+    },
+    {
+      "id": "sha512",
+      "title": "SHA-512"
+    },
+    {
+      "id": "crc32",
+      "title": "CRC32"
+    },
+    {
+      "id": "jwt_decode",
+      "title": "Decode JWT"
+    }
+  ]
+}

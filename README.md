@@ -19,6 +19,21 @@ extensions/sort-lines/  Sort Lines: sort, sort descending, remove duplicates
 extensions/change-case/ Change Case: upper, lower, title, snake_case,
                         kebab-case, camelCase, PascalCase, CONSTANT_CASE
 extensions/encode/      Encode and Decode: Base64, URL and HTML, both ways
+extensions/json-tools/  JSON Tools: format, minify, sort keys, JSON to and
+                        from YAML, and JSON to TypeScript, Rust, Go or
+                        Python types for the file you are in
+extensions/tables/      Tables: format Markdown tables; CSV or TSV to
+                        Markdown, box-drawn table, aligned columns or JSON
+extensions/lines/       Lines: align by = or :, join, number, reverse,
+                        natural sort, sort by length, trim, squeeze, hard
+                        wrap at 80, unwrap, word count
+extensions/calculate/   Calculate: evaluate arithmetic in place, sum and
+                        statistics, hex, binary and decimal, Unix
+                        timestamps to dates and back
+extensions/hash/        Hash: MD5, SHA-1, SHA-256, SHA-512, CRC32, and
+                        decode a JWT
+extensions/banner/      Banner: block-letter banners, comment boxes and
+                        dividers in the file's comment syntax
 scripts/                new-extension.py starts a new one; build-registry.py
                         writes and checks the registry; icons.txt lists the
                         icons a manifest may name

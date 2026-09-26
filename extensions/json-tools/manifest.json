@@ -1,0 +1,45 @@
+{
+  "id": "crc.json-tools",
+  "name": "JSON Tools",
+  "version": "0.1.0",
+  "description": "Format, minify and sort JSON, convert between JSON and YAML, and turn a JSON sample into types for the file's language.",
+  "authors": [
+    "crc"
+  ],
+  "license": "MIT OR Apache-2.0",
+  "icon": "json",
+  "api": 1,
+  "entry": "json_tools.wasm",
+  "capabilities": [
+    "selection.read",
+    "selection.replace",
+    "document.read",
+    "document.edit"
+  ],
+  "commands": [
+    {
+      "id": "format",
+      "title": "Format JSON"
+    },
+    {
+      "id": "minify",
+      "title": "Minify JSON"
+    },
+    {
+      "id": "sort_keys",
+      "title": "Sort JSON Keys"
+    },
+    {
+      "id": "to_yaml",
+      "title": "JSON to YAML"
+    },
+    {
+      "id": "from_yaml",
+      "title": "YAML to JSON"
+    },
+    {
+      "id": "to_types",
+      "title": "JSON to Types"
+    }
+  ]
+}

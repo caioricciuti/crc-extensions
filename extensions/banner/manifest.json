@@ -1,0 +1,35 @@
+{
+  "id": "crc.banner",
+  "name": "Banner",
+  "version": "0.1.0",
+  "description": "Turn the selection into big block letters, a boxed comment or a divider, in the file's comment syntax.",
+  "authors": [
+    "crc"
+  ],
+  "license": "MIT OR Apache-2.0",
+  "icon": "text-size",
+  "api": 1,
+  "entry": "banner.wasm",
+  "capabilities": [
+    "selection.read",
+    "selection.replace"
+  ],
+  "commands": [
+    {
+      "id": "banner",
+      "title": "ASCII Banner"
+    },
+    {
+      "id": "block_banner",
+      "title": "Block Banner"
+    },
+    {
+      "id": "comment_box",
+      "title": "Comment Box"
+    },
+    {
+      "id": "divider",
+      "title": "Comment Divider"
+    }
+  ]
+}

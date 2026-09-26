@@ -1,0 +1,53 @@
+{
+  "id": "crc.calculate",
+  "name": "Calculate",
+  "version": "0.1.0",
+  "description": "Evaluate arithmetic in place, sum and describe the numbers in a selection, convert number bases, and convert Unix timestamps to dates and back.",
+  "authors": [
+    "crc"
+  ],
+  "license": "MIT OR Apache-2.0",
+  "icon": "symbol-numeric",
+  "api": 1,
+  "entry": "calculate.wasm",
+  "capabilities": [
+    "selection.read",
+    "selection.replace",
+    "document.read",
+    "document.edit"
+  ],
+  "commands": [
+    {
+      "id": "evaluate",
+      "title": "Evaluate"
+    },
+    {
+      "id": "sum",
+      "title": "Sum Numbers"
+    },
+    {
+      "id": "statistics",
+      "title": "Number Statistics"
+    },
+    {
+      "id": "to_hex",
+      "title": "To Hexadecimal"
+    },
+    {
+      "id": "to_binary",
+      "title": "To Binary"
+    },
+    {
+      "id": "to_decimal",
+      "title": "To Decimal"
+    },
+    {
+      "id": "timestamp_to_date",
+      "title": "Unix Timestamp to Date"
+    },
+    {
+      "id": "date_to_timestamp",
+      "title": "Date to Unix Timestamp"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "id": "crc.tables",
+  "name": "Tables",
+  "version": "0.1.0",
+  "description": "Format Markdown tables, and turn CSV or TSV into Markdown tables, box-drawn tables, aligned columns or JSON.",
+  "authors": [
+    "crc"
+  ],
+  "license": "MIT OR Apache-2.0",
+  "icon": "table",
+  "api": 1,
+  "entry": "tables.wasm",
+  "capabilities": [
+    "selection.read",
+    "selection.replace",
+    "document.read",
+    "document.edit"
+  ],
+  "commands": [
+    {
+      "id": "format_markdown",
+      "title": "Format Markdown Table"
+    },
+    {
+      "id": "csv_to_markdown",
+      "title": "CSV to Markdown Table"
+    },
+    {
+      "id": "markdown_to_csv",
+      "title": "Markdown Table to CSV"
+    },
+    {
+      "id": "csv_to_box",
+      "title": "CSV to Box Table"
+    },
+    {
+      "id": "align_csv",
+      "title": "Align CSV Columns"
+    },
+    {
+      "id": "csv_to_json",
+      "title": "CSV to JSON"
+    }
+  ]
+}

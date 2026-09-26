@@ -1,0 +1,73 @@
+{
+  "id": "crc.lines",
+  "name": "Lines",
+  "version": "0.1.0",
+  "description": "Align, join, number, wrap, sort naturally and tidy lines, and count words.",
+  "authors": [
+    "crc"
+  ],
+  "license": "MIT OR Apache-2.0",
+  "icon": "list-flat",
+  "api": 1,
+  "entry": "lines.wasm",
+  "capabilities": [
+    "selection.read",
+    "selection.replace",
+    "document.read",
+    "document.edit"
+  ],
+  "commands": [
+    {
+      "id": "align_equals",
+      "title": "Align by ="
+    },
+    {
+      "id": "align_colon",
+      "title": "Align by :"
+    },
+    {
+      "id": "join",
+      "title": "Join Lines"
+    },
+    {
+      "id": "number",
+      "title": "Number Lines"
+    },
+    {
+      "id": "reverse",
+      "title": "Reverse Lines"
+    },
+    {
+      "id": "natural_sort",
+      "title": "Sort Lines Naturally"
+    },
+    {
+      "id": "sort_by_length",
+      "title": "Sort Lines by Length"
+    },
+    {
+      "id": "trim_trailing",
+      "title": "Trim Trailing Whitespace"
+    },
+    {
+      "id": "squeeze_blank",
+      "title": "Squeeze Blank Lines"
+    },
+    {
+      "id": "remove_blank",
+      "title": "Remove Blank Lines"
+    },
+    {
+      "id": "wrap",
+      "title": "Hard Wrap at 80"
+    },
+    {
+      "id": "unwrap",
+      "title": "Unwrap Paragraphs"
+    },
+    {
+      "id": "word_count",
+      "title": "Word Count"
+    }
+  ]
+}
