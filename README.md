@@ -3,20 +3,28 @@
 Official extensions for [crc](https://github.com/caioricciuti/crc), the
 macOS text editor.
 
-**Nothing here yet.** crc does not load extensions today. How it will is in
-the [extensions design](https://crceditor.com/extensions/): WebAssembly
-modules with a manifest that declares what each one may read, write and
-reach, run by crc's own interpreter with a budget, off the main thread.
+How crc runs extensions is in the
+[extensions design](https://crceditor.com/extensions/): WebAssembly modules
+with a manifest that declares what each one may read, write and reach, run
+by crc's own interpreter with a budget, off the main thread. crc's side is
+being built now; nothing here is installable yet.
 
-## What will live here
+## What is here
 
 ```
-extensions/<name>/     one folder per extension: Rust source, manifest.json,
-                       README.md shown before install
-crc-extension/         the small crate that turns an extension into a plain
-                       Rust function over &str
-index.json             the registry crc reads, signed
+crc-extension/          the crate: an extension is a plain Rust function
+                        from Input to Output
+extensions/sort-lines/  the first extension: sort, sort descending,
+                        remove duplicate lines
+scripts/                build-registry.py writes and checks the registry
+docs/                   writing-an-extension.md, how to make your own
 ```
+
+A tag `registry-<date>` builds everything from source, signs the registry
+(`index.json`) and opens a draft release. crc reads the latest published
+release and checks the signature against a key built into the app.
+
+To write one, read [docs/writing-an-extension.md](docs/writing-an-extension.md).
 
 ## Rules for every extension in this repository
 
@@ -27,3 +35,14 @@ index.json             the registry crc reads, signed
   unless the design has a capability for it, and it is needed.
 - No dependencies beyond the standard library and `crc-extension` without a
   written review, the same bar as crc itself.
+
+## Licence
+
+Everything here is dual-licensed under [MIT](LICENSE-MIT) or
+[Apache 2.0](LICENSE-APACHE), at your option. That includes the
+`crc-extension` crate, so an extension built on it can use any licence its
+author likes, open or not. crc itself is GPL-3.0; extensions talk to it
+through a defined interface and are not part of it.
+
+Unless you say otherwise, a contribution you submit is dual-licensed the
+same way, without additional terms.

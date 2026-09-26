@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = ["crc-extension", "extensions/*"]
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/caioricciuti/crc-extensions"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

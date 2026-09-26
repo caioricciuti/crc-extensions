@@ -1,0 +1,6 @@
+# Pinned like crc's own, so an extension builds the same way everywhere.
+[toolchain]
+channel = "1.98.0"
+profile = "minimal"
+components = ["rustfmt", "clippy"]
+targets = ["wasm32-unknown-unknown"]

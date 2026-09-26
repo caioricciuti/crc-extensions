@@ -1,0 +1,9 @@
+[package]
+name = "crc-extension"
+version = "0.1.0"
+description = "Write crc editor extensions as plain Rust functions."
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]

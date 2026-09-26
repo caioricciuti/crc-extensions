@@ -1,0 +1,37 @@
+name: CI
+
+# Every push and pull request: each extension builds from source, its tests
+# and lints pass, and the registry it would publish is valid.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      # Pinned by commit, like crc's own workflows.
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      # rust-toolchain.toml pins the compiler and the wasm32 target; rustup,
+      # already on the runner, installs them.
+      - name: Format
+        run: cargo fmt --all --check
+      - name: Tests
+        run: cargo test --locked
+      - name: Lints
+        run: |
+          cargo clippy --locked --all-targets -- -D warnings
+          cargo clippy --locked --release --target wasm32-unknown-unknown -- -D warnings
+      - name: Build every extension
+        run: cargo build --locked --release --target wasm32-unknown-unknown
+      - name: The registry is valid
+        run: python3 scripts/build-registry.py

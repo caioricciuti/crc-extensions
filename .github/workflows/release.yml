@@ -1,0 +1,55 @@
+name: Release
+
+# A tag `registry-<yyyy.mm.dd>` builds every extension from source, writes
+# the registry, signs it, and opens a draft release. crc reads the latest
+# published release, so nothing reaches anyone until a person publishes it.
+on:
+  push:
+    tags: ["registry-*"]
+
+# Creating the release is the one write. Everything else is read.
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    # The signing key lives on the `release` environment, not the
+    # repository: a pull request or a branch build can never see it, and a
+    # required reviewer approves every run.
+    environment: release
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - name: Tests
+        run: cargo test --locked
+      - name: Build every extension
+        run: cargo build --locked --release --target wasm32-unknown-unknown
+      - name: Write the registry
+        run: python3 scripts/build-registry.py --out dist
+      # ECDSA P-256 over SHA-256, DER encoded: what crc verifies with
+      # Security.framework. The key exists on disk for this step only.
+      - name: Sign the registry
+        env:
+          REGISTRY_SIGNING_KEY: ${{ secrets.REGISTRY_SIGNING_KEY }}
+        run: |
+          umask 077
+          printf '%s\n' "$REGISTRY_SIGNING_KEY" > "$RUNNER_TEMP/key.pem"
+          openssl dgst -sha256 -sign "$RUNNER_TEMP/key.pem" -out dist/index.json.sig dist/index.json
+          rm -f "$RUNNER_TEMP/key.pem"
+      # The signature must verify against the public key in this repository,
+      # which is the one built into crc. A wrong secret fails here, not on
+      # everyone's machine.
+      - name: Verify with the published public key
+        run: openssl dgst -sha256 -verify keys/registry.pub.pem -signature dist/index.json.sig dist/index.json
+      - name: Open a draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --draft --latest --generate-notes --title "${GITHUB_REF_NAME#registry-}" \
+            dist/index.json dist/index.json.sig dist/*.wasm
