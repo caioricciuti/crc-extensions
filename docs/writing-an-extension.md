@@ -4,7 +4,7 @@ A crc extension is a small Rust library compiled to WebAssembly. crc runs it
 in a sandbox: it gets the text you give it, returns what should replace it,
 and cannot touch your files, your network or anything else unless its
 manifest asks and you agree. The design behind this is at
-[crceditor.com/extensions](https://crceditor.com/extensions/).
+[crceditor.com/extensions/design](https://crceditor.com/extensions/design/).
 
 ## What you need
 

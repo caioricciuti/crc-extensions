@@ -4,7 +4,7 @@ Official extensions for [crc](https://github.com/caioricciuti/crc), the
 macOS text editor.
 
 How crc runs extensions is in the
-[extensions design](https://crceditor.com/extensions/): WebAssembly modules
+[extensions design](https://crceditor.com/extensions/design/): WebAssembly modules
 with a manifest that declares what each one may read, write and reach, run
 by crc's own interpreter with a budget, off the main thread. crc's side is
 shipping; the official registry is published from this repository's
