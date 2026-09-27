@@ -31,14 +31,29 @@ fn sorted(input: Input, reverse: bool) -> Output {
     Output::replace(join(&lines, trailing))
 }
 
-fn split(text: &str) -> (Vec<&str>, bool) {
-    (text.lines().collect(), text.ends_with('\n'))
+/// The lines, and the line break to put back between them: CRLF when the
+/// text uses it (`lines()` drops the `\r`, and joining with `\n` turned a
+/// CRLF selection into LF), and whether it ended with one.
+fn split(text: &str) -> (Vec<&str>, Break) {
+    let newline = if text.contains("\r\n") { "\r\n" } else { "\n" };
+    (
+        text.lines().collect(),
+        Break {
+            newline,
+            trailing: text.ends_with('\n'),
+        },
+    )
 }
 
-fn join(lines: &[&str], trailing: bool) -> String {
-    let mut out = lines.join("\n");
-    if trailing {
-        out.push('\n');
+struct Break {
+    newline: &'static str,
+    trailing: bool,
+}
+
+fn join(lines: &[&str], end: Break) -> String {
+    let mut out = lines.join(end.newline);
+    if end.trailing {
+        out.push_str(end.newline);
     }
     out
 }
@@ -68,5 +83,10 @@ mod tests {
         assert_eq!(run(sort, "b\na"), "a\nb");
         assert_eq!(run(sort_reverse, "b\na\nc\n"), "c\nb\na\n");
         assert_eq!(run(unique, "a\nb\na\n"), "a\nb\n");
+    }
+
+    #[test]
+    fn crlf_stays_crlf() {
+        assert_eq!(run(sort, "b\r\na\r\n"), "a\r\nb\r\n");
     }
 }

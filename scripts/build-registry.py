@@ -12,20 +12,25 @@ import hashlib
 import json
 import pathlib
 import re
+import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 WASM_DIR = ROOT / "target" / "wasm32-unknown-unknown" / "release"
 API = 1
+# Exactly what crc's `Capability::parse` accepts (src/ext/manifest.rs in
+# the crc repository). A name crc does not know would pass here and then be
+# skipped by every crc, silently.
 CAPABILITIES = {
     "selection.read",
     "selection.replace",
     "document.read",
     "document.edit",
-    "index.query",
-    "diagnostics.publish",
-    "status.item",
 }
+# crc's `MAX_ID_LEN`: the id names a folder on the user's disk.
+MAX_ID_LEN = 100
+# The host functions crc links, as crc's `HOST_FUNCTIONS`.
+HOST_FUNCTIONS = {"log"}
 ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)+$")
 VERSION = re.compile(r"^\d+\.\d+\.\d+$")
 COMMAND = re.compile(r"^[a-z][a-z0-9_]*$")
@@ -101,8 +106,8 @@ def main():
         for key in ["id", "name", "version", "description", "license", "api", "entry", "capabilities", "commands"]:
             if key not in m:
                 fail(where, f"manifest has no {key!r}")
-        if not ID.match(m["id"]):
-            fail(where, f"id {m['id']!r} is not like 'author.name'")
+        if not ID.match(m["id"]) or len(m["id"]) > MAX_ID_LEN:
+            fail(where, f"id {m['id']!r} is not like 'author.name' (at most {MAX_ID_LEN} characters)")
         if m["id"] in seen:
             fail(where, f"id {m['id']!r} is used twice")
         seen.add(m["id"])
@@ -133,6 +138,9 @@ def main():
         for name in REQUIRED:
             if name not in exports:
                 fail(where, f"{m['entry']} does not export {name}")
+        command_ids = [c.get("id", "") for c in m["commands"]]
+        if len(set(command_ids)) != len(command_ids):
+            fail(where, "a command id is listed twice")
         for command in m["commands"]:
             if not COMMAND.match(command.get("id", "")) or not command.get("title"):
                 fail(where, f"bad command {command}")
@@ -140,7 +148,9 @@ def main():
                 fail(where, f"command {command['id']!r} is not exported by {m['entry']}")
         # Only crc's own host functions; which of them get linked is up to
         # the capabilities, at load time.
-        foreign = [f"{mod}.{name}" for mod, name in imports if mod != "crc"]
+        foreign = [
+            f"{mod}.{name}" for mod, name in imports if mod != "crc" or name not in HOST_FUNCTIONS
+        ]
         if foreign:
             fail(where, f"imports from outside crc: {foreign}")
         name = f"{m['id']}-{m['version']}.wasm"
@@ -152,7 +162,18 @@ def main():
         entry["readme"] = readme.read_text()
         entries.append(entry)
         print(f"{m['id']} {m['version']}: {len(data)} bytes, {len(m['commands'])} commands")
-    index = {"api": API, "extensions": entries}
+    # Rises with every publish, so crc can refuse an older signed list served
+    # again as the latest. The commit time of what is built: reproducible,
+    # and later for every later commit.
+    serial = int(
+        subprocess.run(
+            ["git", "-C", str(ROOT), "log", "-1", "--format=%ct"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    )
+    index = {"api": API, "serial": serial, "extensions": entries}
     (out / "index.json").write_text(json.dumps(index, indent=2, ensure_ascii=False) + "\n")
     shown = out.relative_to(ROOT) if out.is_relative_to(ROOT) else out
     print(f"{shown}/index.json: {len(entries)} extensions")

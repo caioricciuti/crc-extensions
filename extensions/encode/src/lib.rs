@@ -93,8 +93,10 @@ pub fn url_decode(input: Input) -> Output {
     while i < bytes.len() {
         match bytes[i] {
             b'%' => {
+                // Two hex digits exactly: `from_str_radix` also takes `+F`.
                 let hex = bytes
                     .get(i + 1..i + 3)
+                    .filter(|h| h.iter().all(u8::is_ascii_hexdigit))
                     .and_then(|h| std::str::from_utf8(h).ok())
                     .and_then(|h| u8::from_str_radix(h, 16).ok());
                 let Some(b) = hex else {
@@ -146,9 +148,13 @@ pub fn html_unescape(input: Input) -> Output {
     while let Some(at) = rest.find('&') {
         out.push_str(&rest[..at]);
         rest = &rest[at..];
-        let entity = rest
-            .find(';')
-            .filter(|&end| end <= 12)
+        // Entities are short: look for the `;` in the next few bytes only.
+        // Searching the whole rest for each `&` made a long text of `&&`
+        // quadratic, and the command ran out of time.
+        let window = &rest.as_bytes()[..rest.len().min(13)];
+        let entity = window
+            .iter()
+            .position(|&b| b == b';')
             .map(|end| (&rest[1..end], end));
         let decoded = entity.and_then(|(name, _)| match name {
             "amp" => Some('&'),
@@ -159,9 +165,14 @@ pub fn html_unescape(input: Input) -> Output {
             "nbsp" => Some('\u{a0}'),
             _ => {
                 let number = name.strip_prefix('#')?;
+                // Digits only: `parse` and `from_str_radix` also take a `+`.
                 let code = match number.strip_prefix(['x', 'X']) {
-                    Some(hex) => u32::from_str_radix(hex, 16).ok()?,
-                    None => number.parse().ok()?,
+                    Some(hex) if hex.bytes().all(|b| b.is_ascii_hexdigit()) => {
+                        u32::from_str_radix(hex, 16).ok()?
+                    }
+                    Some(_) => return None,
+                    None if number.bytes().all(|b| b.is_ascii_digit()) => number.parse().ok()?,
+                    None => return None,
                 };
                 char::from_u32(code)
             }
@@ -250,5 +261,15 @@ mod tests {
             ),
             "<b> &amp; é😀 &bogus; & x"
         );
+    }
+
+    #[test]
+    fn signs_are_not_digits_and_long_text_is_fast() {
+        assert!(run(url_decode, "%+F").replace.is_none());
+        assert_eq!(replaced(html_unescape, "&#+65;"), "&#+65;");
+        let long = "a && b\n".repeat(150_000);
+        let started = std::time::Instant::now();
+        assert_eq!(replaced(html_unescape, &long), long);
+        assert!(started.elapsed() < std::time::Duration::from_secs(2));
     }
 }

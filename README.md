@@ -42,7 +42,10 @@ docs/                   writing-an-extension.md, how to make your own
 
 A tag `registry-<date>` builds everything from source, signs the registry
 (`index.json`) and opens a draft release. crc reads the latest published
-release and checks the signature against a key built into the app.
+release and checks the signature against a key built into the app. The
+index carries a `serial` (the commit time it was built from), and crc
+refuses one older than the newest it has seen, so an old signed index
+cannot be served again as the latest.
 
 To write one: `python3 scripts/new-extension.py`, then read
 [docs/writing-an-extension.md](docs/writing-an-extension.md).

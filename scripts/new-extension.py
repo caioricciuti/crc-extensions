@@ -42,6 +42,27 @@ def ask(prompt, default=None, check=None, why=""):
         print(f"  {why or 'required'}")
 
 
+# Rust's keywords, strict and reserved: a command id becomes a function name.
+KEYWORDS = set(
+    "as break const continue crate else enum extern false fn for if impl in let loop match mod "
+    "move mut pub ref return self static struct super trait true type unsafe use where while "
+    "async await dyn abstract become box do final macro override priv typeof unsized virtual "
+    "yield try gen".split()
+)
+# Names the generated crate already uses: `commands!` declares `command`,
+# and the module exports these itself.
+TAKEN = {"command", "crc_alloc", "crc_free", "memory"}
+
+
+def unusable_command(cid):
+    """Why `cid` cannot be a command's function name, or None."""
+    if cid in KEYWORDS:
+        return f"{cid!r} is a Rust keyword; pick another id"
+    if cid in TAKEN:
+        return f"{cid!r} is already used by the extension itself; pick another id"
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(description="Start a new crc extension.")
     parser.add_argument("--id", help="author.name, lower case, never changes")
@@ -73,7 +94,15 @@ def main():
     )
     if not ID.match(ext_id):
         sys.exit(f"--id {ext_id!r} is not like author.name")
-    slug = ext_id.split(".", 1)[1].replace(".", "-")
+    author_part, rest = ext_id.split(".", 1)
+    # Dots become underscores and the author stays (except crc's own), so
+    # different ids never share a folder: `a.tool` and `b.tool`, or `x.a-b`
+    # and `x.a.b`, used to map to the same one.
+    slug = rest.replace(".", "_")
+    if author_part != "crc":
+        slug = f"{author_part}-{slug}"
+    if not slug[0].isalpha():
+        sys.exit(f"--id {ext_id!r}: the part after the author must start with a letter (it names a Rust crate)")
     folder = ROOT / "extensions" / slug
     if folder.exists():
         sys.exit(f"{folder.relative_to(ROOT)} exists already")
@@ -108,6 +137,9 @@ def main():
         cid, _, title = spec.partition(":")
         if not COMMAND.match(cid) or not title.strip():
             sys.exit(f"--command {spec!r} is not id:Title with an id like shout_loudly")
+        why = unusable_command(cid)
+        if why:
+            sys.exit(f"--command {spec!r}: {why}")
         commands.append((cid, title.strip()))
     if not commands and interactive:
         print("Commands: an id (lower case and underscores) and the title the palette shows.")
@@ -120,6 +152,10 @@ def main():
                 break
             if not COMMAND.match(cid):
                 print("  lower case, digits and underscores, like shout_loudly")
+                continue
+            why = unusable_command(cid)
+            if why:
+                print(f"  {why}")
                 continue
             default_title = " ".join(w.capitalize() for w in cid.split("_"))
             commands.append((cid, ask("  Palette title", default_title)))
