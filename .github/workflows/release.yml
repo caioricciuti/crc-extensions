@@ -13,6 +13,8 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
+  # Built from vendor/ only, as in CI.
+  CARGO_NET_OFFLINE: true
 
 jobs:
   release:
@@ -25,6 +27,12 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
+      # Fetches exactly what Cargo.lock names, then refuses any build script
+      # or proc macro not reviewed in scripts/check-build-scripts.sh.
+      - name: Vendor, then build scripts, proc macros, tree size
+        env:
+          CARGO_NET_OFFLINE: false
+        run: ./scripts/vendor.sh
       - name: Tests
         run: cargo test --locked
       - name: Build every extension

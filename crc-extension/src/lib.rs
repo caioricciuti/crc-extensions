@@ -56,6 +56,11 @@ pub struct Output {
     pub replace: Option<String>,
     /// Shown in crc's status line.
     pub message: Option<String>,
+    /// A whole HTML page crc shows in the preview pane beside the editor.
+    /// Needs the `preview.show` capability. crc runs no script in it and
+    /// loads nothing from the network; files load only from the document's
+    /// folder.
+    pub html: Option<String>,
 }
 
 impl Output {
@@ -63,15 +68,23 @@ impl Output {
     pub fn replace(text: impl Into<String>) -> Output {
         Output {
             replace: Some(text.into()),
-            message: None,
+            ..Output::default()
         }
     }
 
     /// Change nothing, say `text`.
     pub fn message(text: impl Into<String>) -> Output {
         Output {
-            replace: None,
             message: Some(text.into()),
+            ..Output::default()
+        }
+    }
+
+    /// Show `page`, a whole HTML document, in the preview pane.
+    pub fn html(page: impl Into<String>) -> Output {
+        Output {
+            html: Some(page.into()),
+            ..Output::default()
         }
     }
 

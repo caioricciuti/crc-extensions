@@ -12,6 +12,9 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
+  # Anything that reaches the network after the vendor step is a bug we
+  # want loud: every build below reads vendor/ and nothing else.
+  CARGO_NET_OFFLINE: true
 
 jobs:
   build:
@@ -23,6 +26,15 @@ jobs:
           persist-credentials: false
       # rust-toolchain.toml pins the compiler and the wasm32 target; rustup,
       # already on the runner, installs them.
+      #
+      # The one step allowed to fetch, and only what Cargo.lock names,
+      # checked against its checksums. The gate after it runs no dependency
+      # code: it reads what cargo reports and stops a new build script or
+      # proc macro before `cargo test` below would run it.
+      - name: Vendor, then build scripts, proc macros, tree size
+        env:
+          CARGO_NET_OFFLINE: false
+        run: ./scripts/vendor.sh
       - name: Format
         run: cargo fmt --all --check
       - name: Tests

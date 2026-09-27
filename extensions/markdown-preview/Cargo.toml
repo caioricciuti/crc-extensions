@@ -1,0 +1,17 @@
+[package]
+name = "markdown-preview"
+version = "0.1.0"
+publish = false
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+crc-extension = { path = "../../crc-extension" }
+# The one third-party crate in this repository. CommonMark and GFM done
+# right is thousands of lines; see docs/dependency-review.md. Exact pin, no
+# default features: `html` is the writer, nothing else (no CLI, no simd).
+pulldown-cmark = { version = "=0.13.4", default-features = false, features = ["html"] }

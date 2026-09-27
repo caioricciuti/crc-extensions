@@ -42,7 +42,11 @@ pub fn read_input(bytes: &[u8]) -> Option<Input> {
 pub fn write_output(output: &Output) -> String {
     let mut out = String::from("{");
     let mut first = true;
-    for (key, value) in [("replace", &output.replace), ("message", &output.message)] {
+    for (key, value) in [
+        ("replace", &output.replace),
+        ("message", &output.message),
+        ("html", &output.html),
+    ] {
         if let Some(value) = value {
             if !first {
                 out.push(',');
@@ -213,5 +217,9 @@ mod tests {
             r#"{"replace":"a\"b\\\n\u0001","message":"done"}"#
         );
         assert_eq!(write_output(&Output::nothing()), "{}");
+        assert_eq!(
+            write_output(&Output::html("<p>\"hi\"</p>")),
+            r#"{"html":"<p>\"hi\"</p>"}"#
+        );
     }
 }

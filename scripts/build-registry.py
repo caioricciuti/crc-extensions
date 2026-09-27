@@ -26,6 +26,7 @@ CAPABILITIES = {
     "selection.replace",
     "document.read",
     "document.edit",
+    "preview.show",
 }
 # crc's `MAX_ID_LEN`: the id names a folder on the user's disk.
 MAX_ID_LEN = 100
@@ -120,6 +121,12 @@ def main():
             fail(where, f"unknown capabilities {sorted(unknown)}")
         if not m["commands"]:
             fail(where, "no commands")
+        # crc's Cmd-E runs the command named `preview`, on the whole document.
+        if "preview.show" in m["capabilities"]:
+            if not any(c.get("id") == "preview" for c in m["commands"]):
+                fail(where, "preview.show needs a command with the id 'preview'")
+            if "document.read" not in m["capabilities"]:
+                fail(where, "preview.show needs document.read: a preview is of the whole document")
         if m.get("icon", "extensions") not in ICONS:
             fail(where, f"unknown icon {m.get('icon')!r}; see scripts/icons.txt")
         if "homepage" in m and not str(m["homepage"]).startswith("https://"):

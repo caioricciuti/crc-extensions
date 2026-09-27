@@ -49,7 +49,9 @@ crc_extension::commands! {
 `Input` has the `text` (the selection, or the whole document when nothing
 is selected), whether it was a `selection`, and the document's `language`.
 An `Output` can `replace` the text, show a `message` in the status line, or
-both. `crc_extension::log` writes to crc's extension log while you debug.
+both. With the `preview.show` capability it can instead return `html`, a
+whole page crc shows in a pane beside the editor (see Markdown Preview).
+`crc_extension::log` writes to crc's extension log while you debug.
 
 **`manifest.json`**: what crc shows before install and enforces after.
 
@@ -85,6 +87,7 @@ both. `crc_extension::log` writes to crc's extension log while you debug.
 | `selection.replace` | replace the selection |
 | `document.read` | read the whole document |
 | `document.edit` | replace the whole document |
+| `preview.show` | return `html` for the preview pane beside the editor; needs `document.read` and a command with the id `preview`, which Cmd-E runs |
 
 More (the project index, diagnostics, a status bar item) come as crc
 implements them. There is no network, file or process access, on purpose.
@@ -120,4 +123,6 @@ crc says so before it installs. Your commands appear in the palette.
 
 Rules for this repository: built from source (no binaries in the pull
 request), no dependencies beyond the standard library and `crc-extension`
-without a written reason, and only the capabilities the extension uses.
+without a written reason (in [dependency-review.md](dependency-review.md),
+with the crate pinned, vendored and its build script allowlisted), and only
+the capabilities the extension uses.

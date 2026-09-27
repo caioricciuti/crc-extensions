@@ -34,10 +34,15 @@ extensions/hash/        Hash: MD5, SHA-1, SHA-256, SHA-512, CRC32, and
                         decode a JWT
 extensions/banner/      Banner: block-letter banners, comment boxes and
                         dividers in the file's comment syntax
+extensions/markdown-preview/
+                        Markdown Preview: the document rendered in a pane
+                        beside the editor, as you type (Cmd-E)
 scripts/                new-extension.py starts a new one; build-registry.py
                         writes and checks the registry; icons.txt lists the
-                        icons a manifest may name
-docs/                   writing-an-extension.md, how to make your own
+                        icons a manifest may name; vendor.sh and
+                        check-build-scripts.sh hold dependencies to review
+docs/                   writing-an-extension.md, how to make your own;
+                        dependency-review.md, the one crate used and why
 ```
 
 A tag `registry-<date>` builds everything from source, signs the registry
@@ -58,7 +63,8 @@ To write one: `python3 scripts/new-extension.py`, then read
 - Asks only for the capabilities it uses. No network, files or processes
   unless the design has a capability for it, and it is needed.
 - No dependencies beyond the standard library and `crc-extension` without a
-  written review, the same bar as crc itself.
+  written review, the same bar as crc itself. The one there is (Markdown
+  Preview's pulldown-cmark) is pinned, vendored in CI, and built offline.
 
 ## Licence
 
