@@ -1,7 +1,7 @@
 {
   "id": "crc.encode",
   "name": "Encode and Decode",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Base64, URL and HTML encoding of the selection or document, both ways.",
   "authors": [
     "crc"

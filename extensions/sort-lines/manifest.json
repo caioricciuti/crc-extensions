@@ -1,7 +1,7 @@
 {
   "id": "crc.sort-lines",
   "name": "Sort Lines",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Sort the selected lines, or the whole document, and remove duplicates.",
   "authors": ["crc"],
   "license": "MIT OR Apache-2.0",
