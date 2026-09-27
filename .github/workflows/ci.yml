@@ -41,6 +41,6 @@ jobs:
         run: |
           python3 scripts/new-extension.py --id ci.scaffold-check \
             --description "Checks the scaffold." --author CI --command "run:Run" </dev/null
-          cargo test -p scaffold-check
-          cargo build --release --target wasm32-unknown-unknown -p scaffold-check
+          cargo test -p ci-scaffold-check
+          cargo build --release --target wasm32-unknown-unknown -p ci-scaffold-check
           python3 scripts/build-registry.py --out "$RUNNER_TEMP/registry"
