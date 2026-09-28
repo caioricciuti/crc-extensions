@@ -48,7 +48,9 @@ jobs:
       - name: The registry is valid
         run: python3 scripts/build-registry.py
       # What a contributor starts from must build and pass the same checks.
-      # Not --locked: the new package is not in Cargo.lock, by design.
+      # Not --locked: the new package is not in Cargo.lock, by design. Still
+      # offline against vendor/, so the only thing it can add to the lockfile
+      # is its own path package.
       - name: The scaffold makes an extension that builds and validates
         run: |
           python3 scripts/new-extension.py --id ci.scaffold-check \

@@ -10,10 +10,13 @@ record of what was checked.
 - CI and the release workflow run `scripts/vendor.sh` first: `cargo vendor
   --locked` fetches exactly what `Cargo.lock` names, checked against its
   checksums, and every later step builds with `CARGO_NET_OFFLINE=true`.
-- `scripts/check-build-scripts.sh` asks cargo which dependency targets are
-  build scripts or proc macros and fails on anything not on its allowlist.
-  It runs before any dependency code does. It also fails when the tree grows
-  past `MAX_CRATES`.
+- `scripts/check-build-scripts.sh` reads `cargo metadata` (it runs no
+  dependency code, and runs before any does) and fails on: a crate or
+  version not in `ALLOWED_CRATES`, a source other than crates.io, a path
+  package outside this workspace, a dependency build script or proc macro
+  not on its allowlist, a build script or proc macro in the workspace's own
+  packages (none are allowed), or a tree past `MAX_CRATES`. crc runs the
+  same script with its own lists.
 - A dependency is linked into one extension's module, never into
   `crc-extension`, so every other extension stays at zero.
 - Whatever a dependency does, it runs inside crc's sandbox: no files, no
