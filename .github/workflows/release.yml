@@ -37,6 +37,8 @@ jobs:
         run: cargo test --locked
       - name: Build every extension
         run: cargo build --locked --release --target wasm32-unknown-unknown
+      - name: The manifest contract holds
+        run: python3 scripts/build-registry.py --check-contract scripts/contract/manifests.json
       - name: Write the registry
         run: python3 scripts/build-registry.py --out dist
       # ECDSA P-256 over SHA-256, DER encoded: what crc verifies with

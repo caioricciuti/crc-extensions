@@ -47,6 +47,15 @@ jobs:
         run: cargo build --locked --release --target wasm32-unknown-unknown
       - name: The registry is valid
         run: python3 scripts/build-registry.py
+      # The manifest rules are crc's. The same accept and reject cases run
+      # here through this repository's checks, and the copies here must be
+      # crc's current ones: a rule changed on one side fails on the other.
+      - name: The manifest contract matches crc
+        run: |
+          python3 scripts/build-registry.py --check-contract scripts/contract/manifests.json
+          base=https://raw.githubusercontent.com/caioricciuti/crc/main/tests/fixtures/extensions/contract
+          curl -fsSL --proto =https "$base/manifests.json" | diff -u - scripts/contract/manifests.json
+          curl -fsSL --proto =https "$base/icons.txt" | diff -u - scripts/icons.txt
       # What a contributor starts from must build and pass the same checks.
       # Not --locked: the new package is not in Cargo.lock, by design. Still
       # offline against vendor/, so the only thing it can add to the lockfile
