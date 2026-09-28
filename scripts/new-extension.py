@@ -16,17 +16,15 @@ commands with their palette titles. Standard library only.
 import argparse
 import json
 import pathlib
-import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)+$")
-COMMAND = re.compile(r"^[a-z][a-z0-9_]*$")
-ICONS = [
-    line.strip()
-    for line in (ROOT / "scripts" / "icons.txt").read_text().splitlines()
-    if line.strip() and not line.startswith("#")
-]
+sys.path.insert(0, str(ROOT / "scripts"))
+from rules import COMMAND, ICONS, ID, MAX_ID_LEN  # noqa: E402  (shared with build-registry.py)
+
+
+def valid_id(ext_id):
+    return bool(ID.fullmatch(ext_id)) and len(ext_id) <= MAX_ID_LEN
 
 
 def ask(prompt, default=None, check=None, why=""):
@@ -85,14 +83,14 @@ def main():
     args = parser.parse_args()
 
     if args.list_icons:
-        print("\n".join(ICONS))
+        print("\n".join(sorted(ICONS)))
         return
 
     interactive = args.id is None
     ext_id = args.id or ask(
-        "Id (author.name)", check=ID.match, why="like yourname.shout: lower case, dots between parts"
+        "Id (author.name)", check=valid_id, why="like yourname.shout: lower case, dots between parts"
     )
-    if not ID.match(ext_id):
+    if not valid_id(ext_id):
         sys.exit(f"--id {ext_id!r} is not like author.name")
     author_part, rest = ext_id.split(".", 1)
     # Dots become underscores and the author stays (except crc's own), so
@@ -135,7 +133,7 @@ def main():
     commands = []
     for spec in args.command or []:
         cid, _, title = spec.partition(":")
-        if not COMMAND.match(cid) or not title.strip():
+        if not COMMAND.fullmatch(cid) or not title.strip():
             sys.exit(f"--command {spec!r} is not id:Title with an id like shout_loudly")
         why = unusable_command(cid)
         if why:
@@ -150,7 +148,7 @@ def main():
                 sys.exit("\nstopped")
             if not cid and commands:
                 break
-            if not COMMAND.match(cid):
+            if not COMMAND.fullmatch(cid):
                 print("  lower case, digits and underscores, like shout_loudly")
                 continue
             why = unusable_command(cid)
