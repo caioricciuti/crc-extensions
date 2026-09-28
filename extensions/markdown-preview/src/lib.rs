@@ -18,21 +18,45 @@ pub fn preview(input: Input) -> Output {
 /// The body: CommonMark with tables, task lists, strikethrough and
 /// footnotes. Raw HTML becomes text, so what shows is what the Markdown
 /// says and nothing the page could be made to do; a block of it shows as
-/// code, keeping its lines.
+/// code, keeping its lines. An image from the network, which crc's preview
+/// never loads, shows as its description instead of a broken picture.
 pub fn render(markdown: &str) -> String {
     let options = Options::ENABLE_TABLES
         | Options::ENABLE_TASKLISTS
         | Options::ENABLE_STRIKETHROUGH
         | Options::ENABLE_FOOTNOTES;
-    let events = Parser::new_ext(markdown, options).map(|event| match event {
+    // Whether each open image is a remote one, drawn as its text.
+    let mut images: Vec<bool> = Vec::new();
+    let events = Parser::new_ext(markdown, options).map(move |event| match event {
         Event::Start(Tag::HtmlBlock) => Event::Html(CowStr::Borrowed("<pre class=\"raw\"><code>")),
         Event::End(TagEnd::HtmlBlock) => Event::Html(CowStr::Borrowed("</code></pre>\n")),
         Event::Html(html) | Event::InlineHtml(html) => Event::Text(html),
+        Event::Start(Tag::Image { dest_url, .. }) if is_remote(&dest_url) => {
+            images.push(true);
+            Event::Html(CowStr::from(format!(
+                "<span class=\"remote-image\" title=\"{}\">",
+                page::escape(&dest_url)
+            )))
+        }
+        event @ Event::Start(Tag::Image { .. }) => {
+            images.push(false);
+            event
+        }
+        Event::End(TagEnd::Image) if images.pop() == Some(true) => {
+            Event::Html(CowStr::Borrowed("</span>"))
+        }
         other => other,
     });
     let mut out = String::with_capacity(markdown.len() * 3 / 2);
     pulldown_cmark::html::push_html(&mut out, events);
     out
+}
+
+/// An address on the network: crc's preview loads files from the
+/// document's folder only.
+fn is_remote(url: &str) -> bool {
+    let url = url.trim_start().to_ascii_lowercase();
+    url.starts_with("http:") || url.starts_with("https:") || url.starts_with("//")
 }
 
 /// The first heading's text, for the page title.
@@ -112,6 +136,24 @@ mod tests {
         });
         assert!(out.html.is_none());
         assert!(out.message.unwrap().contains("Markdown"));
+    }
+
+    #[test]
+    fn a_remote_image_shows_as_its_description() {
+        let body = render(
+            "[![CI](https://example.com/ci.svg?x=1&y=2)](https://example.com)\n\n![map](img/map.png)\n",
+        );
+        assert!(
+            body.contains(
+                "<span class=\"remote-image\" title=\"https://example.com/ci.svg?x=1&amp;y=2\">CI</span>"
+            ),
+            "{body}"
+        );
+        assert!(!body.contains("<img src=\"https:"), "{body}");
+        assert!(
+            body.contains("<img src=\"img/map.png\" alt=\"map\""),
+            "{body}"
+        );
     }
 
     #[test]

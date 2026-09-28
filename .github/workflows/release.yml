@@ -40,7 +40,10 @@ jobs:
       - name: The manifest contract holds
         run: python3 scripts/build-registry.py --check-contract scripts/contract/manifests.json
       - name: Write the registry
-        run: python3 scripts/build-registry.py --out dist
+        run: |
+          curl -fsSL --proto =https -o "$RUNNER_TEMP/published.json" \
+            https://github.com/caioricciuti/crc-extensions/releases/latest/download/index.json
+          python3 scripts/build-registry.py --out dist --previous "$RUNNER_TEMP/published.json"
       # ECDSA P-256 over SHA-256, DER encoded: what crc verifies with
       # Security.framework. The key exists on disk for this step only.
       - name: Sign the registry

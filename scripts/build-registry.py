@@ -5,8 +5,12 @@ Run after `cargo build --release --target wasm32-unknown-unknown`. Checks
 every manifest against the rules crc enforces, so a bad extension fails
 here, in CI, and never reaches anyone. Standard library only.
 
-Usage: scripts/build-registry.py [--out dist]
+Usage: scripts/build-registry.py [--out dist] [--previous index.json]
        scripts/build-registry.py --check-contract scripts/contract/manifests.json
+
+--previous is the published index to compare with: an extension at the same
+version as there must be built from the same source. A changed module under
+an old version never reaches the people who installed that version.
 """
 
 import hashlib
@@ -133,6 +137,27 @@ def wasm_interface(data):
     return exports, imports
 
 
+# Everything outside an extension's folder that shapes its module's bytes.
+SHARED_SOURCES = ["Cargo.toml", "Cargo.lock", "rust-toolchain.toml", "crc-extension"]
+
+
+def source_digest(folder):
+    """SHA-256 over every file that goes into `folder`'s module: its own
+    files and the shared ones, by path and content. The same on any machine,
+    where the module's bytes are not."""
+    h = hashlib.sha256()
+    paths = []
+    for base in [folder] + [ROOT / s for s in SHARED_SOURCES]:
+        if base.is_file():
+            paths.append(base)
+        else:
+            paths.extend(p for p in base.rglob("*") if p.is_file() and "target" not in p.parts)
+    for path in sorted(paths, key=lambda p: p.relative_to(ROOT).as_posix()):
+        h.update(path.relative_to(ROOT).as_posix().encode() + b"\0")
+        h.update(hashlib.sha256(path.read_bytes()).digest())
+    return h.hexdigest()
+
+
 def check_manifest(m):
     """The first rule `m` breaks, or None: the same rules as crc's
     manifest::parse, which the shared contract in scripts/contract/ holds
@@ -209,6 +234,28 @@ def check_contract(path):
     print(f"{path}: {len(corpus['cases'])} cases agree with crc")
 
 
+def check_versions(entries, previous_path):
+    """Fails when an extension kept its published version but not its
+    source: crc keeps an installed version as it is, so a changed module
+    under an old number would never reach anyone who has it."""
+    previous = {
+        (e.get("id"), e.get("version")): e.get("source_sha256")
+        for e in json.loads(pathlib.Path(previous_path).read_text()).get("extensions", [])
+    }
+    stale = [
+        f"{e['id']} {e['version']}"
+        for e in entries
+        # Entries published before sources were recorded cannot be compared.
+        if previous.get((e["id"], e["version"])) not in (None, e["source_sha256"])
+    ]
+    if stale:
+        sys.exit(
+            "changed since they were published at the same version; bump each version:\n  "
+            + "\n  ".join(stale)
+        )
+    print(f"versions: every extension at a published version has its published source")
+
+
 def main():
     out = ROOT / (sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else "dist")
     out.mkdir(parents=True, exist_ok=True)
@@ -262,6 +309,7 @@ def main():
         entry = dict(m)
         entry["wasm"] = name
         entry["sha256"] = hashlib.sha256(data).hexdigest()
+        entry["source_sha256"] = source_digest(folder)
         entry["size"] = len(data)
         entry["readme"] = readme.read_text()
         entries.append(entry)
@@ -277,6 +325,8 @@ def main():
             text=True,
         ).stdout.strip()
     )
+    if "--previous" in sys.argv:
+        check_versions(entries, sys.argv[sys.argv.index("--previous") + 1])
     index = {"api": API, "serial": serial, "extensions": entries}
     (out / "index.json").write_text(json.dumps(index, indent=2, ensure_ascii=False) + "\n")
     shown = out.relative_to(ROOT) if out.is_relative_to(ROOT) else out

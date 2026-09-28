@@ -45,8 +45,14 @@ jobs:
           cargo clippy --locked --release --target wasm32-unknown-unknown -- -D warnings
       - name: Build every extension
         run: cargo build --locked --release --target wasm32-unknown-unknown
+      # Valid, and every extension still at a published version is built
+      # from the source published at it: a change needs a new version, or
+      # the people who installed the old one never get it.
       - name: The registry is valid
-        run: python3 scripts/build-registry.py
+        run: |
+          curl -fsSL --proto =https -o "$RUNNER_TEMP/published.json" \
+            https://github.com/caioricciuti/crc-extensions/releases/latest/download/index.json
+          python3 scripts/build-registry.py --previous "$RUNNER_TEMP/published.json"
       # The manifest rules are crc's. The same accept and reject cases run
       # here through this repository's checks, and the copies here must be
       # crc's current ones: a rule changed on one side fails on the other.

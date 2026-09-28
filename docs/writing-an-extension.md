@@ -117,7 +117,11 @@ crc says so before it installs. Your commands appear in the palette.
 
 - **In this repository**: open a pull request adding your folder. CI builds
   it from source; once merged it ships in the next signed registry release,
-  and everyone can install it from crc's Extensions page.
+  and everyone can install it from crc's Extensions page. A change to a
+  published extension needs a new `version`: crc keeps an installed
+  version as it is, and CI fails when an extension's source changed but
+  its version did not. A change to `crc-extension` or `Cargo.lock` counts
+  as a change to every extension built on it.
 - **On your own**: publish the folder anywhere. People install it from a
   folder, unsigned, after crc shows them what it asks for.
 

@@ -38,6 +38,8 @@ th, td { border: 1px solid var(--line); padding: 6px 13px; }
 th { font-weight: 600; }
 tr:nth-child(2n) { background: var(--soft); }
 img { max-width: 100%; }
+.remote-image { display: inline-block; padding: 0 0.45em; border: 1px solid var(--line);
+  border-radius: 4px; font-size: 0.85em; color: var(--muted); }
 hr { border: 0; height: 0.25em; background: var(--line); margin: 1.5em 0; }
 del { color: var(--muted); }
 .footnote-definition { font-size: 0.875em; color: var(--muted); display: flex; gap: 0.5em; }
@@ -54,7 +56,7 @@ pub fn wrap(body: &str, title: Option<String>) -> String {
     )
 }
 
-fn escape(text: &str) -> String {
+pub(crate) fn escape(text: &str) -> String {
     let mut out = String::with_capacity(text.len());
     for c in text.chars() {
         match c {
