@@ -52,8 +52,10 @@ KEYWORDS = set(
 TAKEN = {"command", "crc_alloc", "crc_free", "memory"}
 
 
-def unusable_command(cid):
+def unusable_command(cid, commands):
     """Why `cid` cannot be a command's function name, or None."""
+    if any(cid == taken for taken, _ in commands):
+        return f"{cid!r} is already a command of this extension"
     if cid in KEYWORDS:
         return f"{cid!r} is a Rust keyword; pick another id"
     if cid in TAKEN:
@@ -94,8 +96,10 @@ def main():
         sys.exit(f"--id {ext_id!r} is not like author.name")
     author_part, rest = ext_id.split(".", 1)
     # Dots become underscores and the author stays (except crc's own), so
-    # different ids never share a folder: `a.tool` and `b.tool`, or `x.a-b`
-    # and `x.a.b`, used to map to the same one.
+    # `a.tool` and `b.tool` get folders of their own. That alone is not
+    # enough: an author can hold a hyphen (`a-b.c` and `a.b-c` both give
+    # `a-b-c`), and Cargo reads `-` as `_` in the library name (`x.a-b` and
+    # `x.a.b` both build `x_a_b.wasm`), so a clash is checked below.
     slug = rest.replace(".", "_")
     if author_part != "crc":
         slug = f"{author_part}-{slug}"
@@ -104,6 +108,10 @@ def main():
     folder = ROOT / "extensions" / slug
     if folder.exists():
         sys.exit(f"{folder.relative_to(ROOT)} exists already")
+    library = slug.replace("-", "_")
+    for other in (ROOT / "extensions").iterdir():
+        if other.is_dir() and other.name.replace("-", "_") == library:
+            sys.exit(f"--id {ext_id!r} would build {library}.wasm, as extensions/{other.name} does")
     default_name = " ".join(w.capitalize() for w in slug.split("-"))
     name = args.name or (ask("Name", default_name) if interactive else default_name)
     # With flags, a missing field is an error rather than a prompt, so a
@@ -135,7 +143,7 @@ def main():
         cid, _, title = spec.partition(":")
         if not COMMAND.fullmatch(cid) or not title.strip():
             sys.exit(f"--command {spec!r} is not id:Title with an id like shout_loudly")
-        why = unusable_command(cid)
+        why = unusable_command(cid, commands)
         if why:
             sys.exit(f"--command {spec!r}: {why}")
         commands.append((cid, title.strip()))
@@ -151,7 +159,7 @@ def main():
             if not COMMAND.fullmatch(cid):
                 print("  lower case, digits and underscores, like shout_loudly")
                 continue
-            why = unusable_command(cid)
+            why = unusable_command(cid, commands)
             if why:
                 print(f"  {why}")
                 continue
