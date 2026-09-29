@@ -56,7 +56,9 @@ jobs:
       # The manifest rules are crc's. The same accept and reject cases run
       # here through this repository's checks, and the copies here must be
       # crc's current ones: a rule changed on one side fails on the other.
-      # The JSON string vectors run in crc-extension's tests the same way.
+      # json-strings.txt is crc's JSON string vectors; crc runs them. The
+      # crate's own test of them waits for the next version bump, since any
+      # change under crc-extension/ changes every published source hash.
       - name: The extension contract matches crc
         run: |
           python3 scripts/build-registry.py --check-contract scripts/contract/manifests.json
