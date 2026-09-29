@@ -35,14 +35,22 @@ def fail(where, why):
 
 
 def leb(data, at):
+    """The unsigned 32-bit LEB128 number at `at`, and where it ends. Bounded
+    as crc reads it: five bytes at most, and never past the data."""
     value, shift = 0, 0
     while True:
+        if at >= len(data):
+            raise ValueError("a number runs past the end of the module")
         byte = data[at]
         at += 1
         value |= (byte & 0x7F) << shift
         if byte & 0x80 == 0:
+            if value > 0xFFFFFFFF:
+                raise ValueError("a number does not fit in 32 bits")
             return value, at
         shift += 7
+        if shift >= 35:
+            raise ValueError("a number longer than five bytes")
 
 
 def wasm_interface(data):
