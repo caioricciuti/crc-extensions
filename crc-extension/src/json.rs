@@ -209,6 +209,42 @@ mod tests {
         assert_eq!(read_input(b"not json"), None);
     }
 
+    /// crc's own vectors (`tests/fixtures/extensions/contract/json-strings.txt`
+    /// there, checked by CI): what crc sends decodes the same here.
+    #[test]
+    fn string_vectors_shared_with_crc() {
+        let vectors = include_str!("../../scripts/contract/json-strings.txt");
+        for line in vectors
+            .lines()
+            .filter(|l| !l.is_empty() && !l.starts_with('#'))
+        {
+            let (literal, expected) = line.split_once('\t').expect("literal, tab, expected");
+            let parsed = Parser {
+                s: literal.as_bytes(),
+                at: 0,
+            }
+            .string();
+            if expected == "error" {
+                assert_eq!(parsed, None, "{literal} should be refused");
+                continue;
+            }
+            let bytes: Vec<u8> = (0..expected.len())
+                .step_by(2)
+                .map(|i| u8::from_str_radix(&expected[i..i + 2], 16).expect("hex"))
+                .collect();
+            let text = String::from_utf8(bytes).expect("UTF-8");
+            assert_eq!(parsed.as_deref(), Some(text.as_str()), "{literal}");
+            let mut escaped = String::new();
+            escape(&text, &mut escaped);
+            let back = Parser {
+                s: escaped.as_bytes(),
+                at: 0,
+            }
+            .string();
+            assert_eq!(back.as_deref(), Some(text.as_str()), "{escaped}");
+        }
+    }
+
     #[test]
     fn writes_output_escaped() {
         let out = Output::replace("a\"b\\\n\u{1}").with_message("done");
